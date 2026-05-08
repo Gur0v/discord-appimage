@@ -39,6 +39,25 @@ fi
 
 isEulaAccepted=1
 
+#adding modules from build to .config 
+ln -sf "$path"/modules/*/* "$XDG_CONFIG_HOME"/discord/*.*.*/modules/
+
+#adding installed.json to .config
+dir=("$XDG_CONFIG_HOME"/discord/*.*.*/modules)
+cat > "${dir[0]}/installed.json" <<EOF
+{
+  "discord_desktop_core": {"installedVersion": 1},
+  "discord_erlpack": {"installedVersion": 1},
+  "discord_spellcheck": {"installedVersion": 1},
+  "discord_utils": {"installedVersion": 1},
+  "discord_voice": {"installedVersion": 1},
+  "discord_zstd": {"installedVersion": 1},
+  "discord_krisp": {},
+  "discord_game_utils": {},
+  "discord_rpc": {}
+}
+EOF
+
 atexit()
 {
   if [ $isEulaAccepted == 1 ] ; then
