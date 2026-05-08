@@ -21,23 +21,19 @@ jobs:
     - name: Download Discord
       run: |
         wget -qO - "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xz -C .
-        mv ./Discord ./discord
 
     - name: Patch to include files
       run: |
-        cd discord
-        cp ../AppRun Discord/.
-        chmod +x Discord/AppRun
-        cp ../discord.desktop Discord/.
-        cd ..
+        cp ./AppRun ./Discord/.
+        chmod +x ./Discord/AppRun
+        cp ./discord.desktop ./Discord/.
     
     - name: Patch AppImage
       run: |
         sudo apt install libfuse2 -y
-        cd discord
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x *.AppImage
-        ./appimagetool-x86_64.AppImage Discord -n -u 'gh-releases-zsync|srevinsaju|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
+        ./appimagetool-x86_64.AppImage ./Discord -n -u 'gh-releases-zsync|srevinsaju|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
         mkdir dist
         mv Discord*.AppImage dist/.
         mv *.zsync dist/.
@@ -50,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: discord-continuous-x86_64.AppImage
-        path: 'discord/dist/*'
+        path: 'dist/*'
 
 
   Release:
