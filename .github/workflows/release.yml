@@ -21,10 +21,11 @@ jobs:
     - name: Download Discord
       run: |
         wget -qO - "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xz -C .
+        mv ./Discord ./discord
 
     - name: Patch to include files
       run: |
-        cd Discord
+        cd discord
         cp ../AppRun Discord/.
         chmod +x Discord/AppRun
         cp ../discord.desktop Discord/.
@@ -33,7 +34,7 @@ jobs:
     - name: Patch AppImage
       run: |
         sudo apt install libfuse2 -y
-        cd Discord
+        cd discord
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x *.AppImage
         ./appimagetool-x86_64.AppImage Discord -n -u 'gh-releases-zsync|srevinsaju|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
