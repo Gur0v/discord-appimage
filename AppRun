@@ -39,12 +39,16 @@ fi
 
 isEulaAccepted=1
 
-#adding modules from build to .config 
-ln -sf "$path"/modules/*/* "$XDG_CONFIG_HOME"/discord/*.*.*/modules/
+VERSION=$(cat "$APPDIR"/resources/build_info.json | jq -r .version)
+echo "$VERSION"
+
+mkdir -p "$XDG_CONFIG_HOME"/discord/"$VERSION"/modules/
+
+#adding modules from build to .config
+ln -sf "$APPDIR"/modules/*/* "$XDG_CONFIG_HOME"/discord/"$VERSION"/modules/
 
 #adding installed.json to .config
-dir=("$XDG_CONFIG_HOME"/discord/*.*.*/modules)
-cat > "${dir[0]}/installed.json" <<EOF
+cat > "$XDG_CONFIG_HOME"/discord/"$VERSION"/modules/installed.json <<EOF
 {
   "discord_desktop_core": {"installedVersion": 1},
   "discord_erlpack": {"installedVersion": 1},
