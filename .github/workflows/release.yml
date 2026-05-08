@@ -33,6 +33,7 @@ jobs:
         cp ./AppRun ./Discord/.
         chmod +x ./Discord/AppRun
         cp ./discord.desktop ./Discord/.
+        sed -i 's/0/1/g' ./Discord/resources/bootstrap/manifest.json
     
     - name: Patch AppImage
       run: |
