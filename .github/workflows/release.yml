@@ -42,7 +42,6 @@ jobs:
           chmod +x ./EquilotlCli-Linux
 
           ./EquilotlCli-Linux -location ./Discord -install
-          ./EquilotlCli-Linux -location ./Discord -install-openasar
 
           echo "Looking for generated Equicord files:"
           find "$HOME/.config/Equicord" -maxdepth 3 -type f -print || true
@@ -68,8 +67,8 @@ jobs:
 
           asar pack appasar ./Discord/resources/app.asar
 
-          echo "After Equilotl patch:"
-          find ./Discord/resources -maxdepth 2 -type f | grep -Ei "equicord|openasar|app.asar" || true
+          echo "After Equicord patch:"
+          find ./Discord/resources -maxdepth 2 -type f | grep -Ei "equicord|app.asar" || true
 
       - name: Patch AppImage files
         run: |
