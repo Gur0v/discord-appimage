@@ -44,9 +44,32 @@ jobs:
           ./EquilotlCli-Linux -location ./Discord -install
           ./EquilotlCli-Linux -location ./Discord -install-openasar
 
+          echo "Looking for generated Equicord files:"
+          find "$HOME/.config/Equicord" -maxdepth 3 -type f -print || true
+
+          if [ ! -f "$HOME/.config/Equicord/equicord.asar" ]; then
+            echo "equicord.asar was not created by Equilotl"
+            exit 1
+          fi
+
+          cp "$HOME/.config/Equicord/equicord.asar" ./Discord/resources/equicord.asar
+
+          npm install -g asar
+
+          rm -rf appasar
+          mkdir appasar
+          asar extract ./Discord/resources/app.asar appasar
+
+          echo "Searching for hardcoded GitHub Actions path:"
+          grep -R "/home/runner/.config/Equicord/equicord.asar" appasar || true
+
+          grep -RIl "/home/runner/.config/Equicord/equicord.asar" appasar \
+            | xargs -r sed -i 's|/home/runner/.config/Equicord/equicord.asar|../equicord.asar|g'
+
+          asar pack appasar ./Discord/resources/app.asar
+
           echo "After Equilotl patch:"
-          find ./Discord -name "*.asar" -type f -print
-          find ./Discord -maxdepth 4 -type f | grep -Ei "equicord|openasar|app.asar|index.js|preload" || true
+          find ./Discord/resources -maxdepth 2 -type f | grep -Ei "equicord|openasar|app.asar" || true
 
       - name: Patch AppImage files
         run: |
