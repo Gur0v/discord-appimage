@@ -22,28 +22,63 @@ jobs:
         run: |
           wget -qO - "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xz -C .
           mv ./Discord ./Discord_Updater
+
           mkdir ./worktable
           chmod +x ./Discord_Updater/updater_bootstrap
+
           ./Discord_Updater/updater_bootstrap --no-zenity ./worktable stable https://updates.discord.com/
+
           mv ./worktable/app-* ./Discord
 
-      - name: Patch to include files
+          echo "Discord AppDir contents:"
+          find ./Discord -maxdepth 3 -type f | sort
+
+          echo "ASAR files:"
+          find ./Discord -name "*.asar" -type f -print
+
+      - name: Patch with Equilotl
+        run: |
+          wget -O EquilotlCli-Linux "https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux"
+          chmod +x ./EquilotlCli-Linux
+
+          ./EquilotlCli-Linux -location ./Discord -branch stable -install
+          ./EquilotlCli-Linux -location ./Discord -branch stable -install-openasar
+
+          echo "After Equilotl patch:"
+          find ./Discord -name "*.asar" -type f -print
+          find ./Discord -maxdepth 4 -type f | grep -Ei "equicord|openasar|app.asar|index.js|preload" || true
+
+      - name: Patch AppImage files
         run: |
           cp ./AppRun ./Discord/.
           chmod +x ./Discord/AppRun
-          cp ./discord.desktop ./Discord/.
-          sed -i 's/0/1/g' ./Discord/resources/bootstrap/manifest.json
 
-      - name: Patch AppImage
+          cp ./discord.desktop ./Discord/.
+
+          if [ -f ./Discord/resources/bootstrap/manifest.json ]; then
+            sed -i 's/0/1/g' ./Discord/resources/bootstrap/manifest.json
+          fi
+
+      - name: Build AppImage
         run: |
           sudo apt update
-          sudo apt install libfuse2 -y
-          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x *.AppImage
-          ARCH=x86_64 ./appimagetool-x86_64.AppImage ./Discord -n -u 'gh-releases-zsync|Gur0v|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
+          sudo apt install libfuse2 jq -y
+
+          wget -O appimagetool-x86_64.AppImage "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool-x86_64.AppImage
+
+          VERSION="$(jq -r .version Discord/resources/build_info.json)"
+          echo "Building Discord $VERSION"
+
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage \
+            ./Discord \
+            -n \
+            -u 'gh-releases-zsync|Gur0v|discord-appimage|stable|Discord*.AppImage.zsync' \
+            "Discord-${VERSION}-x86_64.AppImage"
+
           mkdir dist
           mv Discord*.AppImage dist/.
-          mv *.zsync dist/.
+          mv *.zsync dist/. || true
           chmod +x dist/*.AppImage
 
       - name: Upload artifact
