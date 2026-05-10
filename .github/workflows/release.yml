@@ -41,8 +41,8 @@ jobs:
           wget -O EquilotlCli-Linux "https://github.com/Equicord/Equilotl/releases/latest/download/EquilotlCli-Linux"
           chmod +x ./EquilotlCli-Linux
 
-          ./EquilotlCli-Linux -location ./Discord -branch stable -install
-          ./EquilotlCli-Linux -location ./Discord -branch stable -install-openasar
+          ./EquilotlCli-Linux -location ./Discord -install
+          ./EquilotlCli-Linux -location ./Discord -install-openasar
 
           echo "After Equilotl patch:"
           find ./Discord -name "*.asar" -type f -print
