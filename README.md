@@ -15,11 +15,9 @@
   <a href="https://github.com/Gur0v/discord-appimage/releases/tag/stable">Download</a>
 </p>
 
----
-
 ## About
 
-This repository provides unofficial AppImage builds of the stable Discord Linux client with **[Equicord](https://equicord.org) pre-installed** — this is not a plain Discord AppImage.
+This repository provides unofficial AppImage builds of the stable Discord Linux client with **[Equicord](https://equicord.org) pre-installed**. This is not a plain Discord AppImage.
 
 Equicord is a Discord client mod that adds plugins, themes, and extra features on top of the standard client. It's injected at build time, so you get a fully modded Discord out of the box with no extra setup.
 
