@@ -1,4 +1,5 @@
 name: Release
+
 on:
   schedule:
     - cron: "5 */12 * * *"
@@ -13,66 +14,61 @@ permissions:
 jobs:
   Discord:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        version: ['3.8']
+
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Download Discord
-      run: |
-        wget -qO - "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xz -C .
-        mv ./Discord ./Discord_Updater
-        mkdir ./worktable
-        chmod +x ./Discord_Updater/updater_bootstrap
-        ./Discord_Updater/updater_bootstrap --no-zenity ./worktable stable https://updates.discord.com/
-        mv ./worktable/app-* ./Discord
+      - name: Download Discord Stable
+        run: |
+          wget -qO - "https://discord.com/api/download?platform=linux&format=tar.gz" | tar -xz -C .
+          mv ./Discord ./Discord_Updater
+          mkdir ./worktable
+          chmod +x ./Discord_Updater/updater_bootstrap
+          ./Discord_Updater/updater_bootstrap --no-zenity ./worktable stable https://updates.discord.com/
+          mv ./worktable/app-* ./Discord
 
-    - name: Patch to include files
-      run: |
-        cp ./AppRun ./Discord/.
-        chmod +x ./Discord/AppRun
-        cp ./discord.desktop ./Discord/.
-        sed -i 's/0/1/g' ./Discord/resources/bootstrap/manifest.json
-    
-    - name: Patch AppImage
-      run: |
-        sudo apt install libfuse2 -y
-        wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-        chmod +x *.AppImage
-        ARCH=x86_64 ./appimagetool-x86_64.AppImage ./Discord -n -u 'gh-releases-zsync|Gur0v|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
-        mkdir dist
-        mv Discord*.AppImage dist/.
-        mv *.zsync dist/.
-        cd dist
-        chmod +x *.AppImage
-        cd ..
-       
+      - name: Patch to include files
+        run: |
+          cp ./AppRun ./Discord/.
+          chmod +x ./Discord/AppRun
+          cp ./discord.desktop ./Discord/.
+          sed -i 's/0/1/g' ./Discord/resources/bootstrap/manifest.json
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: discord-continuous-x86_64.AppImage
-        path: 'dist/*'
+      - name: Patch AppImage
+        run: |
+          sudo apt update
+          sudo apt install libfuse2 -y
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x *.AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage ./Discord -n -u 'gh-releases-zsync|srevinsaju|discord-appimage|stable|Discord*.AppImage.zsync' Discord-$(cat Discord/resources/build_info.json | jq -r .version)-x86_64.AppImage
+          mkdir dist
+          mv Discord*.AppImage dist/.
+          mv *.zsync dist/.
+          chmod +x dist/*.AppImage
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: discord-stable-x86_64.AppImage
+          path: dist/*
 
   Release:
     needs: [Discord]
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: discord-continuous-x86_64.AppImage
-        path: ./artifacts-dir
+      - uses: actions/download-artifact@v4
+        with:
+          name: discord-stable-x86_64.AppImage
+          path: ./artifacts-dir
 
-    - name: Release
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        title: Discord Stable AppImage Builds
-        automatic_release_tag: stable
-        prerelease: false
-        draft: false
-        files: |
-          ./artifacts-dir/*
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          title: Discord Stable AppImage Builds
+          automatic_release_tag: stable
+          prerelease: false
+          draft: false
+          files: |
+            ./artifacts-dir/*
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
